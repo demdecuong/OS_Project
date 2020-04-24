@@ -104,8 +104,8 @@ static struct file_operations fops =
         .owner = THIS_MODULE,
         .open = dev_open,
         .release = dev_close,
-        .read = dev_read,
-        .write = dev_write,
+        //.read = dev_read,
+        //.write = dev_write,
 };
 
 static int __init init_chardev(void) /* Driver Constructor */
@@ -113,7 +113,7 @@ static int __init init_chardev(void) /* Driver Constructor */
     int ret = 0;
 	// Cap phat device number
 	vchar_drv.dev_num = 0;
-	ret = alloc_chrdev_region(& vchar_drv.dev_num,0,1,"random_device");
+	ret = alloc_chrdev_region(& vchar_drv.dev_num,0,1,"random_device2");
 	if(ret < 0)
 	{
 		printk("failed to register device number\n");
@@ -123,14 +123,14 @@ static int __init init_chardev(void) /* Driver Constructor */
 	printk("allocated device number (%d,%d)\n", MAJOR(vchar_drv.dev_num), MINOR(vchar_drv.dev_num));
 	
 	// Tao device file
-	vchar_drv.dev_class = class_create(THIS_MODULE,"class_random_dev");
+	vchar_drv.dev_class = class_create(THIS_MODULE,"class_random_dev2");
 	if( vchar_drv.dev_class == NULL)
 	{
 		printk("failed to create a device class\n");
         unregister_chrdev_region(vchar_drv.dev_num,1);
        // return -1;
 	}
-	vchar_drv.dev = device_create(vchar_drv.dev_class, NULL,vchar_drv.dev_num, NULL,"random_dev");
+	vchar_drv.dev = device_create(vchar_drv.dev_class, NULL,vchar_drv.dev_num, NULL,"random_dev2");
 	if( IS_ERR(vchar_drv.dev))
 	{
 		printk("failed to create a device\n");
