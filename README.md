@@ -35,8 +35,9 @@ Makesure all users can read and write but cannot execute the file/folder
 `cd user_app/`  
 `make`  
 `./user_test`  
-```console  
+
 The console screen output would be:  
+```console
 Select below options:
         o (to open a device node)
         c (to close the device node)
