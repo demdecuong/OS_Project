@@ -6,14 +6,14 @@ Mục tiêu hiểu về Linux kernel module và hệ thống quản lý file và
 + Viết một module dùng để tạo ra số ngẫu nhiên. 
 + Module này sẽ tạo một character device để cho phép các tiến trình ở userspace có thể open và read các số ngẫu nhiên.
 
-- ## To run this program
+## To run this program
 
 -In order to run this program, please following these below instructions:  
 ```console
 cd src/ranNumber
 make
 ```
--Create kernel module  
+- Create kernel module  
 `sudo insmod randNum_chardev.ko`  
 
 
@@ -31,10 +31,10 @@ Makesure all users can read and write but cannot execute the file/folder
 `dmesg`  
 
 
-- To use this kernel mode through userspace:
-`cd user_app/`
-`make`
-`./user_test`
+- To use this kernel mode through userspace:  
+`cd user_app/`  
+`make`  
+`./user_test`  
 ```console
 Select below options:
         o (to open a device node)
@@ -44,11 +44,11 @@ Select below options:
 Enter your option:
 ```
 
-- ## To clean files and stop this module
+## To clean files and stop this module
 
 - Stop this module  
 `sudo rmmod randNum_chardev`  
 
-In *user_app* and *randNumber* folder  
+- In **user_app** and **randNumber** folder  
 `make clean`  
 
