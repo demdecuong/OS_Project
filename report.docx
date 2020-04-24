@@ -49,6 +49,9 @@ Linux kernel cũng giống như một thư viện giúp lập trình viên xây 
 1.2.1 Hệ thống quản lí file
 Hệ thống tập tin của Linux và Unix được tổ chức theo một hệ thống phân bậc tương tự cấu trúc của một cây phân cấp. Bậc cao nhất của hệ thống tập tin là thư mục gốc, được ký hiệu bằng gạch chéo “/” (root directory).
 Nằm dưới thư mục gốc (/) có một loạt các thư mục quan trọng của hệ thống tập tin được công nhận ở tất cả các bản phân phối Linux khác nhau. Dưới đây là danh sách các thư mục thông thường được nhìn thấy dưới thư mục gốc (/):
+
+có nhiệm vụ quản lý dữ liệu trên thiết bị lưu trữ (như ổ cứng, thẻ nhớ). Quản lý dữ liệu gồm các công việc: thêm, tìm kiếm, sửa, xóa dữ liệu.
+
 1. / – Root
 
 - Mở từng tập tin và thư mục từ thư mục Root.
@@ -175,9 +178,68 @@ Chẳng hạn khi bạn cài đặt apache từ nguồn, apache nằm dưới /u
 
 - Ví dụ: /srv/cvs chứa dữ liệu liên quan đến CVS.
 1.2.2 Hệ thống quản lí device
+Điều khiển hoạt động của các thiết bị.
+Giám sát trạng thái của các thiết bị.
+Trao đổi dữ liệu với các thiết bị.
+Lập lịch sử dụng các thiết bị, đặc biệt là thiết bị lưu trữ (ví dụ ổ cứng)
+
+
+Device files are employed to provide the operating system and users an interface 
+to the devices that they represent. All Linux device files are located in the /dev directory, 
+which is an integral part of the root (/) filesystem because these device files must be available 
+to the operating system during the boot process.
+Device file đóng vai trò là interface của device cho Hệ điều hành và người dùng. Tất cả device file được chứa trong \
+thư mục /dev (thư mục này được tích hợp trong root(/) bởi vì device files phải luôn sẵn sàng cho hệ đề hành xuyên suốt quá trình boot ).
+
+One of the most important things to remember about these device files is that they are most definitely not device drivers. They are more accurately described 
+as portals to the device drivers. Data is passed from an application or the
+operating system to the device file which then passes it to the device driver 
+which then sends it to the physical device. The reverse data path is also used, 
+from the physical device through the device driver, the device file, and then to an application or another device.
+Đặc biệt là device file không phải là device drivers, device file đóng vai trò là 1 cổng thông tin cho device drivers.
+Dữ liệu sẽ được truyền từ ứng dụng hoặc hệ điều hành đến device file, sau đó sẽ truyền đến device driver , cuối cùng 
+sẽ được gửi đến thiết bị vật lý.
+
+
 
 https://opensource.com/article/16/11/managing-devices-linux
 https://vimentor.com/vi/lesson/linux-kernel-module
 
 1.3 Giao tiếp giữa tiến trình ở user space và kernel space.
 
+Giao tiếp giữa user-space với kernel-space thông qua shared memory.
+
+Để giao tiếp giữa kernel module với 1 application chúng ta có rất nhiều phương pháp IPC khác nhau. 
+Ví dụ như read/write device file, ioctl, procfs, sysfs, netlink, socket,... Tuy nhiên, tất cả các 
+phương pháp này đều có một nhược điểm, đó là chúng sử dụng system call. Mỗi khi gọi system call thì 
+thread sẽ rơi vào trạng thái sleep, gây chậm chương trình.
+
+Các ứng dụng yêu cầu tốc độ truyền tải dữ liệu cao với độ trễ thấp thì sẽ không sử dụng phương pháp 
+truyền thống này. Thay vào đó, chúng sẽ sử dụng shared memory. Lúc này cả kernel module và application cùng 
+chia sẻ chung 1 vùng nhớ, dữ liệu được đọc ghi từ vùng nhớ đó giống như truy cập vào các con trỏ bình thường, thread 
+không bị sleep. 
+Shared memory là phương pháp IPC có tốc độ cao nhất và độ trễ thấp nhất hiện tại.
+
+Lấy ví dụ như game pubg mà chúng ta hay chơi. Application game chạy trên tầng user-space sẽ 
+render hình ảnh màn hình một cách liên tục. Cái mà chúng ta nhìn thấy trên màn hình thực chất
+là các hình ảnh được render với tốc độ cao (50 - 60 hình ảnh 1s). Nếu không sử dụng shared memory, 
+thì mỗi khi ghi 1 hình ảnh ra màn hình, pubg thread sẽ phải sleep rồi nhường cpu cho driver, driver
+lấy hình ảnh đó và ghi vào DMA của graphic, sau đó kernel sẽ wake up pubg thread dậy để render hình ảnh khác.
+Mỗi 1 chu kỳ như vậy sẽ gây delay 3ms cho pubg thread. Nếu game chơi với chất lượng 60fps tức là pubg thread 
+phải ghi 60 hình ảnh 1s. Thì việc sử dụng IPC truyền thống sẽ gây delay tổng cộng 180ms mỗi giây. Delay 180 là 
+con số quá cao cho việc chơi game, chưa kể đến delay do đường truyền mạng.
+
+Chính vì lý do như vậy, hệ thống graphic trong OS sẽ sử dụng shared memory để giao tiếp giữa kernel và user-space. 
+Thông thường dưới kernel sẽ share trực tiếp vùng DMA physical memory của graphic hardware cho user-space.
+Từ đó, các ứng dụng graphic trên tầng user có thể render trực tiếp vào vùng nhớ đó.
+Đối với hardware bên dưới, nó sẽ định kỳ đọc buffer từ DMA và ghi ra màn hình. 
+Cơ chế này sẽ đảm bảo tốc độ truyền dữ liệu từ tầng user ra màn hình đạt kết quả tối đa.
+
+Các bước thực hiện như sau:
+1. Define 1 vùng reserved memory bằng device tree. Để khi boot lên OS không cấp phát virtual memory trỏ vào vùng physical đó. 
+Nên define theo bội số của 1 page size: x * 4096. 
+Link: https://unix.stackexchange.com/.../how-can-i-reserve-a...
+2. Sau khi hệ điều hành boot xong, em dùng 1 chương trình C gọi hàm mmap để map 1 địa chỉ virtual address trỏ vào vùng physical kia. 
+Link: https://pagefault.blog/.../access-hardware-from.../
+3. Cuối cùng dưới kernel, em dùng hàm phys_to_virt để map virtual address vào vùng physical trên. 
+Link: https://stackoverflow.com/.../accessing-physical-memory...
