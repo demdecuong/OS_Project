@@ -8,9 +8,9 @@ Mục tiêu hiểu về Linux kernel module và hệ thống quản lý file và
 
 ## To run this program
 
--In order to run this program, please following these below instructions:  
+In order to run this program, please following these below instructions:  
 ```console
-cd src/ranNumber
+cd src/randNumber
 make
 ```
 - Create kernel module  
@@ -27,7 +27,7 @@ Makesure all users can read and write but cannot execute the file/folder
 `sudo chmod 666 /dev/random_dev`  
 
 
-- In order to see MAJOR,MINOR of device number,constructor,destructor announcemence  
+- In order to see *MAJOR,MINOR* of device number,constructor,destructor announcemence 
 `dmesg`  
 
 
@@ -35,7 +35,8 @@ Makesure all users can read and write but cannot execute the file/folder
 `cd user_app/`  
 `make`  
 `./user_test`  
-```console
+```console  
+The console screen output would be:  
 Select below options:
         o (to open a device node)
         c (to close the device node)
