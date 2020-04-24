@@ -1,1 +1,0 @@
-cmd_/home/minh/Desktop/Project_OS/src/randNumber2/randNum_chardev2.ko := ld -r -m elf_x86_64  -z max-page-size=0x200000 -T ./scripts/module-common.lds --build-id  -o /home/minh/Desktop/Project_OS/src/randNumber2/randNum_chardev2.ko /home/minh/Desktop/Project_OS/src/randNumber2/randNum_chardev2.o /home/minh/Desktop/Project_OS/src/randNumber2/randNum_chardev2.mod.o ;  true
